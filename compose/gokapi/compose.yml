@@ -1,0 +1,23 @@
+services:
+  gokapi:
+    image: f0rc3/gokapi:latest
+    container_name: gokapi
+    restart: unless-stopped
+    environment:
+      - TZ=${GENERIC_TIMEZONE}
+    volumes:
+      - gokapi_data:/app/data
+      - gokapi_config:/app/config
+    ports:
+      - "53842:53842"
+    networks:
+      - default
+      - web
+
+volumes:
+  gokapi_data:
+  gokapi_config:
+
+networks:
+  web:
+    external: true

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Raspberry Pi Dashboard</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #0f172a;
+            --bg-soft: #172036;
+            --card: rgba(255, 255, 255, 0.06);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-2: #22c55e;
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.15), transparent 30%),
+                radial-gradient(circle at top right, rgba(34, 197, 94, 0.12), transparent 25%),
+                linear-gradient(180deg, #0b1220 0%, var(--bg) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .hero h1 {
+            margin: 0 0 12px;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            line-height: 1.1;
+        }
+
+        .hero p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 1.05rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(56, 189, 248, 0.45);
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            margin-bottom: 18px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(34, 197, 94, 0.18));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .card h2 {
+            margin: 0 0 10px;
+            font-size: 1.25rem;
+        }
+
+        .card p {
+            margin: 0 0 18px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .footer {
+            margin-top: 28px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .status {
+            margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: var(--accent-2);
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.8);
+        }
+
+        #system-stats {
+            margin-top: 18px;
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 10px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+            text-align: left;
+        }
+
+        #system-stats h3 {
+            margin: 8px 8px 8px;
+            font-size: 1.1rem;
+        }
+
+        #system-stats p {
+            margin: 8px 8px 8px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 20px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <section class="hero">
+            <h1>Raspberry Pi Dashboard</h1>
+            <p>Point d’entrée rapide vers tes services self-hosted.</p>
+            <div class="status">
+                <span class="dot"></span>
+                <span>Services disponibles sur le Raspberry Pi</span>
+            </div>
+
+            <div id="system-stats">
+            <h3>État du système</h3>
+                <p>
+                    CPU : <strong id="cpu-value">--</strong><br>
+                    RAM : <strong id="ram-value">--</strong>
+                </p>
+            </div>
+        </section>
+
+        <section class="grid">
+            <a class="card" href="/n8n/">
+                <div class="icon">n8n</div>
+                <h2>n8n</h2>
+                <p>Automatisations, workflows, intégrations et exécution de tâches.</p>
+                <span class="link">Ouvrir n8n →</span>
+            </a>
+
+            <a class="card" href="/gokapi/login">
+                <div class="icon">GK</div>
+                <h2>Gokapi</h2>
+                <p>Partage temporaire de fichiers auto-heberge avec expiration et liens securises.</p>
+                <span class="link">Ouvrir Gokapi →</span>
+            </a>
+
+            <a class="card" href="/netdata/">
+                <div class="icon">ND</div>
+                <h2>Netdata</h2>
+                <p>Monitoring temps réel du Raspberry Pi : CPU, RAM, disque, réseau et processus.</p>
+                <span class="link">Ouvrir Netdata →</span>
+            </a>
+
+            <a class="card" href="/portainer/">
+                <div class="icon">PT</div>
+                <h2>Portainer</h2>
+                <p>Administration Docker, stacks, containers, images, volumes et réseaux.</p>
+                <span class="link">Ouvrir Portainer →</span>
+            </a>
+
+            <a class="card" href="https://connect.raspberrypi.com/">
+                <div class="icon">rPi</div>
+                <h2>Raspberry Pi Connect</h2>
+                <p>Gestion et configuration de ton Raspberry Pi via une interface web.</p>
+                <span class="link">Ouvrir Raspberry Pi Connect →</span>
+            </a>
+        </section>
+
+        <div class="footer">
+            Page d’accueil locale du homelab Raspberry Pi
+        </div>
+    </main>
+</body>
+<script>
+async function updateSystemStats() {
+    try {
+        const [cpuRes, ramRes] = await Promise.all([
+            fetch('/netdata/api/v1/data?chart=system.cpu&format=json&points=1&after=-1&options=percentage'),
+            fetch('/netdata/api/v1/data?chart=system.ram&format=json&points=1&after=-1')
+        ]);
+
+        const cpuJson = await cpuRes.json();
+        const ramJson = await ramRes.json();
+
+        const cpuRow = cpuJson.data?.[0];
+        const ramRow = ramJson.data?.[0];
+
+        if (cpuRow) {
+            const cpuUsage = cpuRow
+                .slice(1)
+                .filter(value => typeof value === 'number')
+                .reduce((sum, value) => sum + value, 0);
+
+            document.getElementById('cpu-value').textContent = `${cpuUsage.toFixed(1)} %`;
+        }
+
+        if (ramRow && ramJson.labels) {
+            const labels = ramJson.labels;
+            const usedIndex = labels.indexOf('used');
+            const freeIndex = labels.indexOf('free');
+            const cachedIndex = labels.indexOf('cached');
+            const buffersIndex = labels.indexOf('buffers');
+
+            const used = usedIndex !== -1 ? ramRow[usedIndex] : 0;
+            const free = freeIndex !== -1 ? ramRow[freeIndex] : 0;
+            const cached = cachedIndex !== -1 ? ramRow[cachedIndex] : 0;
+            const buffers = buffersIndex !== -1 ? ramRow[buffersIndex] : 0;
+
+            const total = used + free + cached + buffers;
+            const percent = total > 0 ? (used / total) * 100 : 0;
+
+            document.getElementById('ram-value').textContent =
+                `${percent.toFixed(1)} % (${Math.round(used)} MiB utilisés)`;
+        }
+    } catch (error) {
+        console.error('Impossible de récupérer les stats système :', error);
+    }
+}
+
+updateSystemStats();
+setInterval(updateSystemStats, 5000);
+</script>
+</html>
