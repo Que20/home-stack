@@ -9,3 +9,5 @@ if [ -z "$running_containers" ]; then
 fi
 
 docker restart $(docker ps -q)
+
+docker ps
