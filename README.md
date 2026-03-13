@@ -4,7 +4,7 @@ Repo d'infrastructure pour déployer rapidement un petit homelab Docker sur Rasp
 
 ## Contenu
 
-- Nginx reverse proxy
+- Caddy reverse proxy
 - Portainer
 - n8n
 - Gokapi
@@ -24,7 +24,7 @@ homelab/
 ├── compose/
 │   ├── reverse-proxy/
 │   │   ├── compose.yml
-│   │   └── nginx.conf
+│   │   └── Caddyfile
 │   ├── n8n/
 │   │   └── compose.yml
 │   ├── gokapi/

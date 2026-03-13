@@ -115,7 +115,7 @@ choose_services_with_whiptail() {
     "n8n" "n8n" ON \
     "gokapi" "Gokapi (temp file sharing)" ON \
     "netdata" "Netdata" ON \
-    "nginx" "Nginx reverse proxy" ON \
+    "caddy" "Caddy reverse proxy" ON \
     "portainer" "Portainer" ON \
     3>&1 1>&2 2>&3)"
 
@@ -132,7 +132,7 @@ choose_services_fallback() {
     echo "2) n8n"
     echo "3) gokapi"
     echo "4) netdata"
-    echo "5) nginx"
+    echo "5) caddy"
     echo "6) portainer"
     echo ""
     read -r -p "Entre les numeros separes par des virgules (ex: 0 ou 1,2,5): " choice
@@ -143,7 +143,7 @@ choose_services_fallback() {
     local normalized
     normalized="${choice// /}"
     if [[ "$normalized" == *"0"* ]]; then
-        SELECTED=("postgres" "n8n" "gokapi" "netdata" "nginx" "portainer")
+        SELECTED=("postgres" "n8n" "gokapi" "netdata" "caddy" "portainer")
         return
     fi
 
@@ -154,7 +154,7 @@ choose_services_fallback() {
             2) SELECTED+=("n8n") ;;
             3) SELECTED+=("gokapi") ;;
             4) SELECTED+=("netdata") ;;
-            5) SELECTED+=("nginx") ;;
+            5) SELECTED+=("caddy") ;;
             6) SELECTED+=("portainer") ;;
         esac
     done
@@ -233,11 +233,11 @@ fi
 export HOST_IP
 echo "==> HOST_IP retenu: ${HOST_IP}"
 
-if contains "n8n" "${SELECTED[@]}" && ! contains "nginx" "${SELECTED[@]}"; then
-    echo "WARNING: n8n est deploye sans nginx, l'interface ne sera pas exposee en HTTP standard."
+if contains "n8n" "${SELECTED[@]}" && ! contains "caddy" "${SELECTED[@]}"; then
+    echo "WARNING: n8n est deploye sans caddy, l'interface ne sera pas exposee en HTTP standard."
 fi
-if contains "portainer" "${SELECTED[@]}" && ! contains "nginx" "${SELECTED[@]}"; then
-    echo "WARNING: portainer est deploye sans nginx, il ne sera pas expose sans mapping de port supplementaire."
+if contains "portainer" "${SELECTED[@]}" && ! contains "caddy" "${SELECTED[@]}"; then
+    echo "WARNING: portainer est deploye sans caddy, il ne sera pas expose sans mapping de port supplementaire."
 fi
 
 echo "==> Création du réseau Docker partagé"
@@ -251,8 +251,8 @@ for service in postgres n8n gokapi netdata; do
 done
 
 RP_SERVICES=()
-if contains "nginx" "${SELECTED[@]}"; then
-    RP_SERVICES+=("nginx")
+if contains "caddy" "${SELECTED[@]}"; then
+    RP_SERVICES+=("caddy")
 fi
 if contains "portainer" "${SELECTED[@]}"; then
     RP_SERVICES+=("portainer")
@@ -265,24 +265,24 @@ fi
 
 echo ""
 echo "==> Déploiement terminé"
-if contains "nginx" "${SELECTED[@]}"; then
+if contains "caddy" "${SELECTED[@]}"; then
     echo "Homepage:   http://${HOST_IP}/"
 fi
-if contains "n8n" "${SELECTED[@]}" && contains "nginx" "${SELECTED[@]}"; then
+if contains "n8n" "${SELECTED[@]}" && contains "caddy" "${SELECTED[@]}"; then
     echo "n8n:        http://${HOST_IP}/n8n/"
 fi
 if contains "gokapi" "${SELECTED[@]}"; then
-    if contains "nginx" "${SELECTED[@]}"; then
+    if contains "caddy" "${SELECTED[@]}"; then
         echo "gokapi (proxy): http://${HOST_IP}/gokapi/"
     fi
     echo "gokapi:      http://${HOST_IP}:53842/ for config: http://${HOST_IP}/gokapi/setup"
 fi
 if contains "netdata" "${SELECTED[@]}"; then
-    if contains "nginx" "${SELECTED[@]}"; then
+    if contains "caddy" "${SELECTED[@]}"; then
         echo "netdata:    http://${HOST_IP}/netdata/"
     fi
     echo "netdata:    http://${HOST_IP}:19999/"
 fi
-if contains "portainer" "${SELECTED[@]}" && contains "nginx" "${SELECTED[@]}"; then
+if contains "portainer" "${SELECTED[@]}" && contains "caddy" "${SELECTED[@]}"; then
     echo "portainer:  http://${HOST_IP}/portainer/"
 fi

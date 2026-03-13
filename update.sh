@@ -32,19 +32,19 @@ fi
 
 HOST_IP="$(resolve_host_ip || true)"
 if [ -z "$HOST_IP" ]; then
-    echo "Impossible de detecter automatiquement l'IP locale."
+    echo "Pas d'adresse disponible."
     exit 1
 fi
 export HOST_IP
 
-docker compose --env-file "$ROOT_DIR/.env" -f "$ROOT_DIR/compose/postgres/compose.yml" pull || true
-docker compose --env-file "$ROOT_DIR/.env" -f "$ROOT_DIR/compose/n8n/compose.yml" pull
-docker compose --env-file "$ROOT_DIR/.env" -f "$ROOT_DIR/compose/gokapi/compose.yml" pull
-docker compose --env-file "$ROOT_DIR/.env" -f "$ROOT_DIR/compose/netdata/compose.yml" pull
-docker compose --env-file "$ROOT_DIR/.env" -f "$ROOT_DIR/compose/reverse-proxy/compose.yml" pull
+docker compose --env-file ".env" -f "compose/postgres/compose.yml" pull || true
+docker compose --env-file ".env" -f "compose/n8n/compose.yml" pull
+docker compose --env-file ".env" -f "compose/gokapi/compose.yml" pull
+docker compose --env-file ".env" -f "compose/netdata/compose.yml" pull
+docker compose --env-file ".env" -f "compose/reverse-proxy/compose.yml" pull
 
-docker compose --env-file "$ROOT_DIR/.env" -f "$ROOT_DIR/compose/postgres/compose.yml" up -d
-docker compose --env-file "$ROOT_DIR/.env" -f "$ROOT_DIR/compose/n8n/compose.yml" up -d
-docker compose --env-file "$ROOT_DIR/.env" -f "$ROOT_DIR/compose/gokapi/compose.yml" up -d
-docker compose --env-file "$ROOT_DIR/.env" -f "$ROOT_DIR/compose/netdata/compose.yml" up -d
-docker compose --env-file "$ROOT_DIR/.env" -f "$ROOT_DIR/compose/reverse-proxy/compose.yml" up -d
+docker compose --env-file ".env" -f "compose/postgres/compose.yml" up -d
+docker compose --env-file ".env" -f "compose/n8n/compose.yml" up -d
+docker compose --env-file ".env" -f "compose/gokapi/compose.yml" up -d
+docker compose --env-file ".env" -f "compose/netdata/compose.yml" up -d
+docker compose --env-file ".env" -f "compose/reverse-proxy/compose.yml" up -d
