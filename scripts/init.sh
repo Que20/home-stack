@@ -74,6 +74,11 @@ bcrypt_hash_password() {
     docker run --rm caddy:2 caddy hash-password --plaintext "$plain_password"
 }
 
+escape_dollars_for_env() {
+    local value="$1"
+    printf '%s\n' "${value//\$/\$\$}"
+}
+
 if [ ! -x "$INSTALL_DOCKER_SCRIPT" ]; then
     echo "Script introuvable ou non exécutable: $INSTALL_DOCKER_SCRIPT"
     exit 1
@@ -105,6 +110,7 @@ fi
 auth_username="$(ask_input "Home Stack" "Username basic_auth (laisser vide pour désactiver)" "")"
 auth_password=""
 auth_hash=""
+auth_hash_env=""
 
 if [ -n "$auth_username" ]; then
     auth_password="$(ask_password "Home Stack" "Password basic_auth")"
@@ -112,9 +118,11 @@ fi
 
 if [ -n "$auth_username" ] && [ -n "$auth_password" ]; then
     auth_hash="$(bcrypt_hash_password "$auth_password")"
+    auth_hash_env="$(escape_dollars_for_env "$auth_hash")"
 else
     auth_username=""
     auth_hash=""
+    auth_hash_env=""
 fi
 
 : > "$ENV_FILE"
@@ -125,7 +133,7 @@ fi
     printf 'POSTGRES_DB=db\n'
     printf 'HOST_IP=%s\n' "$host_value"
     printf 'BASIC_AUTH_USERNAME=%s\n' "$auth_username"
-    printf 'BASIC_AUTH_PASSWORD_HASH=%s\n' "$auth_hash"
+    printf 'BASIC_AUTH_PASSWORD_HASH=%s\n' "$auth_hash_env"
 } >> "$ENV_FILE"
 
 echo ".env initialisé dans $ENV_FILE"

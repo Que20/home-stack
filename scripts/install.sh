@@ -16,6 +16,54 @@ get_env_value() {
     printf '%s' "${line#*=}"
 }
 
+set_env_value() {
+    local key="$1"
+    local value="$2"
+    local tmp_file
+    local line
+    local replaced=0
+
+    tmp_file="$(mktemp)"
+
+    while IFS= read -r line || [ -n "$line" ]; do
+        if [[ "$line" == "${key}="* ]]; then
+            printf '%s=%s\n' "$key" "$value" >> "$tmp_file"
+            replaced=1
+        else
+            printf '%s\n' "$line" >> "$tmp_file"
+        fi
+    done < "$ENV_FILE"
+
+    if [ "$replaced" -eq 0 ]; then
+        printf '%s=%s\n' "$key" "$value" >> "$tmp_file"
+    fi
+
+    mv "$tmp_file" "$ENV_FILE"
+}
+
+unescape_dollars_from_env() {
+    local value="$1"
+    printf '%s\n' "${value//\$\$/\$}"
+}
+
+normalize_basic_auth_hash_env() {
+    local raw_hash
+    local unescaped_hash
+    local escaped_hash
+
+    raw_hash="$(get_env_value BASIC_AUTH_PASSWORD_HASH)"
+    if [ -z "$raw_hash" ]; then
+        return
+    fi
+
+    unescaped_hash="$(unescape_dollars_from_env "$raw_hash")"
+    escaped_hash="${unescaped_hash//\$/\$\$}"
+
+    if [ "$raw_hash" != "$escaped_hash" ]; then
+        set_env_value "BASIC_AUTH_PASSWORD_HASH" "$escaped_hash"
+    fi
+}
+
 contains() {
     local needle="$1"
     shift
@@ -116,9 +164,11 @@ if [ ! -f "$ENV_FILE" ]; then
     exit 1
 fi
 
+normalize_basic_auth_hash_env
+
 HOST_IP="$(get_env_value HOST_IP)"
 BASIC_AUTH_USERNAME="$(get_env_value BASIC_AUTH_USERNAME)"
-BASIC_AUTH_PASSWORD_HASH="$(get_env_value BASIC_AUTH_PASSWORD_HASH)"
+BASIC_AUTH_PASSWORD_HASH="$(unescape_dollars_from_env "$(get_env_value BASIC_AUTH_PASSWORD_HASH)")"
 
 if [ -z "${HOST_IP}" ]; then
     echo "HOST_IP est manquant dans .env"
