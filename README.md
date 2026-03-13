@@ -1,68 +1,121 @@
-# Homelab
+# Home Stack
 
-Repo d'infrastructure pour déployer rapidement un petit homelab Docker sur Raspberry Pi ou mini-PC Debian/Ubuntu-like.
+Stack Docker pour monter rapidement un homelab sur Debian (Raspberry Pi, mini-PC, VM) avec un reverse proxy Caddy, un dashboard HTML simple et des services optionnels.
 
-## Contenu
+## Services disponibles
 
-- Caddy reverse proxy
-- Portainer
-- n8n
-- Gokapi
-- Postgres
-- Netdata
-- Homepage HTML statique
+- `n8n`
+- `gokapi`
+- `netdata`
+- `postgres`
+- `caddy` (reverse proxy + page d'accueil)
 
-## Structure
+## Captures d'ecran
+
+### Saisie de l'hote
+
+![Saisie de l'hote](screenshot/host_input.png)
+
+### Configuration basic auth
+
+![Configuration basic auth](screenshot/basic_auth_input.png)
+
+### Selection des services
+
+![Selection des services](screenshot/services_select.png)
+
+## Structure du projet
 
 ```text
-homelab/
-├── .env.example
-├── .gitignore
-├── install.sh
-├── up.sh
-├── update.sh
-├── compose/
-│   ├── reverse-proxy/
-│   │   ├── compose.yml
-│   │   └── Caddyfile
-│   ├── n8n/
-│   │   └── compose.yml
-│   ├── gokapi/
-│   │   └── compose.yml
-│   ├── postgres/
-│   │   ├── compose.yml
-│   │   └── init.sql
-│   └── netdata/
-│       └── compose.yml
-└── html/
-    └── index.html
+home-stack/
+|-- .env.example
+|-- compose/
+|   |-- gokapi/
+|   |   `-- compose.yml
+|   |-- n8n/
+|   |   `-- compose.yml
+|   |-- netdata/
+|   |   `-- compose.yml
+|   |-- postgres/
+|   |   |-- compose.yml
+|   |   `-- init.sql
+|   `-- reverse-proxy/
+|       |-- Caddyfile
+|       `-- compose.yml
+|-- html/
+|   `-- index.html
+|-- screenshot/
+|   |-- basic_auth_input.png
+|   |-- host_input.png
+|   `-- services_select.png
+`-- scripts/
+    |-- init.sh
+    |-- install.sh
+    |-- install-docker.sh
+    |-- restart.sh
+    `-- stop.sh
 ```
 
-## Installation
+## Prerequis
+
+- OS Linux type Debian/Ubuntu
+- `bash`
+- `whiptail` (recommandé, fallback texte si absent)
+
+Docker peut etre installe automatiquement par `scripts/init.sh` via `scripts/install-docker.sh`.
+
+## Utilisation
+
+1. Rendre les scripts executables:
 
 ```bash
-chmod +x install.sh up.sh update.sh
-./install.sh
-newgrp docker
+chmod +x scripts/*.sh
 ```
 
-`install.sh` ouvre une interface CLI (checkbox) pour choisir les services a installer/deployer.
+2. Initialiser la configuration:
 
-## Variables
+```bash
+./scripts/init.sh
+```
 
-Les variables sont définies dans `.env`.
+3. Installer et lancer les services choisis:
+
+```bash
+./scripts/install.sh
+```
+
+## Scripts utilitaires
+
+- Redemarrer tous les conteneurs en cours:
+
+```bash
+./scripts/restart.sh
+```
+
+- Arrêter tous les conteneurs en cours:
+
+```bash
+./scripts/stop.sh
+```
+
+## Variables `.env`
+
+Valeurs gérées par `scripts/init.sh`:
+
+- `HOST_IP`
+- `BASIC_AUTH_USERNAME`
+- `BASIC_AUTH_PASSWORD_HASH`
+
+Valeurs applicatives (initialisees avec des defaults):
 
 - `GENERIC_TIMEZONE`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
 - `POSTGRES_DB`
 
-`HOST_IP` n'est plus requis dans `.env` : il est detecte automatiquement par les scripts (`install.sh`, `up.sh`, `update.sh`).
+## Notes
 
-Gokapi est preconfigure par son wizard accessible sur `/gokapi/setup`.
-
-## Remarques
-
-- Le réseau Docker partagé s'appelle `web`
-- Les volumes Docker ne sont pas versionnés
-- En cas de migration vers une autre machine, clone le repo, ajuste `.env`, puis relance les scripts
+- Les informations relatives à la config db sont à changer manuellement dans le .env.
+- Le reseau Docker partage est `web`.
+- Le fichier `compose/reverse-proxy/Caddyfile` est genéré automatiquement par `scripts/install.sh`.
+- La page d'accueil est servie depuis `html/index.html`.
