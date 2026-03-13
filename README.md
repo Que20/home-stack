@@ -49,10 +49,12 @@ home-stack/
 |   |-- host_input.png
 |   `-- services_select.png
 `-- scripts/
+    |-- backup.sh
     |-- init.sh
     |-- install.sh
     |-- install-docker.sh
     |-- restart.sh
+    |-- restore.sh
     `-- stop.sh
 ```
 
@@ -97,6 +99,33 @@ chmod +x scripts/*.sh
 ```bash
 ./scripts/stop.sh
 ```
+
+## Backup et restore
+
+- Sauvegarder les donnees `n8n`, `portainer` et `netdata`:
+
+```bash
+./scripts/backup.sh
+```
+
+Ce script cree des archives horodatees dans `backups/`:
+- `backups/n8n_YYYYmmdd_HHMMSS.tar.gz`
+- `backups/portainer_YYYYmmdd_HHMMSS.tar.gz`
+- `backups/netdata_YYYYmmdd_HHMMSS.tar.gz`
+
+- Restaurer la derniere sauvegarde disponible de chaque service:
+
+```bash
+./scripts/restore.sh
+```
+
+- Restaurer une sauvegarde precise via timestamp:
+
+```bash
+./scripts/restore.sh 20260313_154500
+```
+
+Le script de restore stoppe temporairement les conteneurs concerns (`n8n`, `portainer`, `netdata`) puis les redemarre apres extraction.
 
 ## Variables `.env`
 
