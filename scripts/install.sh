@@ -1,0 +1,148 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ENV_FILE="$ROOT_DIR/.env"
+CADDYFILE_PATH="$ROOT_DIR/compose/reverse-proxy/Caddyfile"
+
+get_env_value() {
+    local key="$1"
+    local line
+    line="$(grep -E "^${key}=" "$ENV_FILE" | tail -n 1 || true)"
+    if [ -z "$line" ]; then
+        printf ''
+        return
+    fi
+    printf '%s' "${line#*=}"
+}
+
+contains() {
+    local needle="$1"
+    shift
+    local item
+    for item in "$@"; do
+        if [ "$item" = "$needle" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+choose_services_with_whiptail() {
+    local current
+    current="$(whiptail --title "Home Stack" --checklist "Sélectionne les services à installer" 20 90 10 \
+    "n8n" "n8n" ON \
+    "gokapi" "gokapi" ON \
+    "netdata" "netdat (netdata)" ON \
+    "postgres" "postgres" ON \
+    3>&1 1>&2 2>&3)"
+
+    current="${current//\"/}"
+    read -r -a SELECTED <<< "$current"
+}
+
+choose_services_fallback() {
+    echo "whiptail non disponible, passage en mode texte."
+    echo "1) n8n"
+    echo "2) gokapi"
+    echo "3) netdata"
+    echo "4) postgres"
+    read -r -p "Entre les numéros séparés par des virgules (ex: 1,3,4): " choice
+
+    SELECTED=()
+    IFS=',' read -r -a picked <<< "$choice"
+
+    local item
+    for item in "${picked[@]}"; do
+        case "${item// /}" in
+            1) SELECTED+=("n8n") ;;
+            2) SELECTED+=("gokapi") ;;
+            3) SELECTED+=("netdata") ;;
+            4) SELECTED+=("postgres") ;;
+        esac
+    done
+}
+
+generate_caddyfile() {
+    local host="$1"
+    local auth_username="$2"
+    local auth_hash="$3"
+
+    {
+        printf '%s {\n' "$host"
+        printf '\ttls internal\n\n'
+
+        if [ -n "$auth_username" ] && [ -n "$auth_hash" ]; then
+            printf '\tbasic_auth {\n'
+            printf '\t\t%s %s\n' "$auth_username" "$auth_hash"
+            printf '\t}\n\n'
+        fi
+
+        if contains "n8n" "${SELECTED[@]}"; then
+            printf '\thandle_path /n8n/* {\n'
+            printf '\t\treverse_proxy n8n:5678\n'
+            printf '\t}\n\n'
+        fi
+
+        if contains "gokapi" "${SELECTED[@]}"; then
+            printf '\thandle_path /gokapi/* {\n'
+            printf '\t\treverse_proxy gokapi:53842\n'
+            printf '\t}\n\n'
+        fi
+
+        if contains "netdata" "${SELECTED[@]}"; then
+            printf '\thandle_path /netdata/* {\n'
+            printf '\t\treverse_proxy netdata:19999\n'
+            printf '\t}\n\n'
+        fi
+
+        printf '\thandle {\n'
+        printf '\t\troot * /srv\n'
+        printf '\t\tfile_server\n'
+        printf '\t}\n'
+        printf '}\n'
+    } > "$CADDYFILE_PATH"
+}
+
+if [ ! -f "$ENV_FILE" ]; then
+    echo "Fichier .env introuvable. Lance d'abord scripts/init.sh"
+    exit 1
+fi
+
+HOST_IP="$(get_env_value HOST_IP)"
+BASIC_AUTH_USERNAME="$(get_env_value BASIC_AUTH_USERNAME)"
+BASIC_AUTH_PASSWORD_HASH="$(get_env_value BASIC_AUTH_PASSWORD_HASH)"
+
+if [ -z "${HOST_IP}" ]; then
+    echo "HOST_IP est manquant dans .env"
+    exit 1
+fi
+
+SELECTED=()
+if command -v whiptail >/dev/null 2>&1; then
+    choose_services_with_whiptail
+else
+    choose_services_fallback
+fi
+
+if [ ${#SELECTED[@]} -eq 0 ]; then
+    echo "Aucun service sélectionné."
+    exit 0
+fi
+
+generate_caddyfile "$HOST_IP" "$BASIC_AUTH_USERNAME" "$BASIC_AUTH_PASSWORD_HASH"
+echo "Caddyfile généré: $CADDYFILE_PATH"
+
+docker network inspect web >/dev/null 2>&1 || docker network create web
+
+for service in postgres n8n gokapi netdata; do
+    if contains "$service" "${SELECTED[@]}"; then
+        echo "Déploiement ${service}"
+        docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/compose/${service}/compose.yml" up -d
+    fi
+done
+
+echo "Déploiement reverse proxy"
+docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/compose/reverse-proxy/compose.yml" up -d
+
+echo "Installation terminée"
