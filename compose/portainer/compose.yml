@@ -1,0 +1,18 @@
+services:
+    portainer:
+        image: portainer/portainer-ce:lts
+        container_name: portainer
+        command: -H unix:///var/run/docker.sock
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - portainer_data:/data
+        restart: unless-stopped
+        networks:
+            - web
+
+volumes:
+    portainer_data:
+
+networks:
+    web:
+        external: true

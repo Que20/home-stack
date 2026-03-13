@@ -35,6 +35,7 @@ choose_services_with_whiptail() {
     "gokapi" "gokapi" ON \
     "netdata" "netdat (netdata)" ON \
     "postgres" "postgres" ON \
+    "portainer" "portainer" ON \
     3>&1 1>&2 2>&3)"
 
     current="${current//\"/}"
@@ -90,6 +91,12 @@ generate_caddyfile() {
             printf '\t}\n\n'
         fi
 
+        if contains "portainer" "${SELECTED[@]}"; then
+            printf '\thandle_path /portainer/* {\n'
+            printf '\t\treverse_proxy portainer:9000\n'
+            printf '\t}\n\n'
+        fi
+
         if contains "netdata" "${SELECTED[@]}"; then
             printf '\thandle_path /netdata/* {\n'
             printf '\t\treverse_proxy netdata:19999\n'
@@ -135,7 +142,7 @@ echo "Caddyfile généré: $CADDYFILE_PATH"
 
 docker network inspect web >/dev/null 2>&1 || docker network create web
 
-for service in postgres n8n gokapi netdata; do
+for service in postgres n8n gokapi netdata portainer; do
     if contains "$service" "${SELECTED[@]}"; then
         echo "Déploiement ${service}"
         docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/compose/${service}/compose.yml" up -d
