@@ -8,4 +8,4 @@ if [ -z "$running_containers" ]; then
     exit 0
 fi
 
-docker stop $(docker ps -q)
+docker ps -q | xargs docker stop

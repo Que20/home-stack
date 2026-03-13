@@ -8,6 +8,6 @@ if [ -z "$running_containers" ]; then
     exit 0
 fi
 
-docker restart $(docker ps -q)
+docker ps -q | xargs docker restart
 
 docker ps

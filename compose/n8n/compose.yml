@@ -9,12 +9,12 @@ services:
       - N8N_PATH=/n8n/
       - N8N_PROTOCOL=http
       - N8N_RUNNERS_ENABLED=true
-      - N8N_ENABLE_EXECUTE_COMMAND=true
-      - N8N_BLOCK_ENV_VARS_IN_EXECUTE_COMMAND=false
+      - N8N_ENABLE_EXECUTE_COMMAND=false
+      - N8N_BLOCK_ENV_VARS_IN_EXECUTE_COMMAND=true
       - NODE_ENV=production
       - N8N_EDITOR_BASE_URL=http://${HOST_IP}/n8n/
       - WEBHOOK_URL=http://${HOST_IP}/n8n/
-      - N8N_SECURE_COOKIE=false
+      - N8N_SECURE_COOKIE=true
       - N8N_PROXY_HOPS=1
       - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
       - TZ=${GENERIC_TIMEZONE}
