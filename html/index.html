@@ -14,7 +14,8 @@
             --text: #e5e7eb;
             --muted: #94a3b8;
             --accent: #38bdf8;
-            --accent-2: #22c55e;
+            --green: #22c55e;
+            --red: #ef4444;
             --shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
         }
 
@@ -69,6 +70,7 @@
             display: block;
             text-decoration: none;
             color: inherit;
+            position: relative;
             background: var(--card);
             border: 1px solid var(--card-border);
             border-radius: 22px;
@@ -116,6 +118,28 @@
             font-weight: 600;
         }
 
+        .service-indicator {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            background: #64748b;
+            box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.65);
+            transition: background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .service-indicator.is-up {
+            background: var(--green);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.75), 0 0 0 2px rgba(15, 23, 42, 0.65);
+        }
+
+        .service-indicator.is-down {
+            background: var(--red);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.75), 0 0 0 2px rgba(15, 23, 42, 0.65);
+        }
+
         .footer {
             margin-top: 28px;
             text-align: center;
@@ -130,14 +154,23 @@
             gap: 8px;
             font-size: 0.95rem;
             color: var(--muted);
+            margin: 8px 8px 8px;
         }
 
         .dot {
             width: 10px;
             height: 10px;
             border-radius: 999px;
-            background: var(--accent-2);
+        }
+
+        .green.dot {
+            background: var(--green);
             box-shadow: 0 0 12px rgba(34, 197, 94, 0.8);
+        }
+
+        .red.dot {
+            background: var(--red);
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.8);
         }
 
         #system-stats {
@@ -178,12 +211,7 @@
 <body>
     <main class="container">
         <section class="hero">
-            <h1>Raspberry Pi Dashboard</h1>
-            <p>Point d’entrée rapide vers tes services self-hosted.</p>
-            <div class="status">
-                <span class="dot"></span>
-                <span>Services disponibles sur le Raspberry Pi</span>
-            </div>
+            <h1>Home Stack Dashboard</h1>
 
             <div id="system-stats">
             <h3>État du système</h3>
@@ -191,32 +219,40 @@
                     CPU : <strong id="cpu-value">--</strong><br>
                     RAM : <strong id="ram-value">--</strong>
                 </p>
+                <div class="status">
+                    <span class="dot green"></span>
+                    <span>Services disponibles</span>
+                </div>
             </div>
         </section>
 
         <section class="grid">
-            <a class="card" href="/n8n/">
+            <a class="card" href="/n8n/" data-health-url="/n8n/">
+                <span class="service-indicator" aria-label="Statut du service"></span>
                 <div class="icon">n8n</div>
                 <h2>n8n</h2>
                 <p>Automatisations, workflows, intégrations et exécution de tâches.</p>
                 <span class="link">Ouvrir n8n →</span>
             </a>
 
-            <a class="card" href="/gokapi/login">
+            <a class="card" href="/gokapi/login" data-health-url="/gokapi/login">
+                <span class="service-indicator" aria-label="Statut du service"></span>
                 <div class="icon">GK</div>
                 <h2>Gokapi</h2>
                 <p>Partage temporaire de fichiers auto-heberge avec expiration et liens securises.</p>
                 <span class="link">Ouvrir Gokapi →</span>
             </a>
 
-            <a class="card" href="/netdata/">
+            <a class="card" href="/netdata/" data-health-url="/netdata/">
+                <span class="service-indicator" aria-label="Statut du service"></span>
                 <div class="icon">ND</div>
                 <h2>Netdata</h2>
                 <p>Monitoring temps réel du Raspberry Pi : CPU, RAM, disque, réseau et processus.</p>
                 <span class="link">Ouvrir Netdata →</span>
             </a>
 
-            <a class="card" href="/portainer/">
+            <a class="card" href="/portainer/" data-health-url="/portainer/">
+                <span class="service-indicator" aria-label="Statut du service"></span>
                 <div class="icon">PT</div>
                 <h2>Portainer</h2>
                 <p>Administration Docker, stacks, containers, images, volumes et réseaux.</p>
@@ -232,7 +268,7 @@
         </section>
 
         <div class="footer">
-            Page d’accueil locale du homelab Raspberry Pi
+            Vibe codé avec ❤️ par <a href="https://github.com/Que20">Que20</a>
         </div>
     </main>
 </body>
@@ -282,7 +318,42 @@ async function updateSystemStats() {
     }
 }
 
+function markServiceStatus(card, isUp) {
+    const indicator = card.querySelector('.service-indicator');
+    if (!indicator) {
+        return;
+    }
+    indicator.classList.remove('is-up', 'is-down');
+    indicator.classList.add(isUp ? 'is-up' : 'is-down');
+    indicator.setAttribute('title', isUp ? 'Service actif' : 'Service inactif');
+}
+
+async function updateServiceStatuses() {
+    const cards = document.querySelectorAll('.card[data-health-url]');
+    await Promise.all(Array.from(cards).map(async (card) => {
+        const healthUrl = card.getAttribute('data-health-url');
+        if (!healthUrl) {
+            return;
+        }
+
+        try {
+            const response = await fetch(healthUrl, {
+                method: 'GET',
+                cache: 'no-store',
+                redirect: 'follow'
+            });
+
+            const isUp = response.status < 500;
+            markServiceStatus(card, isUp);
+        } catch {
+            markServiceStatus(card, false);
+        }
+    }));
+}
+
 updateSystemStats();
+updateServiceStatuses();
 setInterval(updateSystemStats, 5000);
+setInterval(updateServiceStatuses, 10000);
 </script>
 </html>
