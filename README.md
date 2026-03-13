@@ -97,6 +97,12 @@ chmod +x scripts/*.sh
 ./scripts/stop.sh
 ```
 
+- Installer et configurer les paquet de sécurité: fail2ban, ufw et Unattended upgrades
+
+```bash
+./scripts/security.sh
+```
+
 ## Backup et restore
 
 - Sauvegarder les données `n8n`, `portainer` et `netdata`:
