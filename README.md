@@ -12,17 +12,14 @@ Stack Docker pour monter rapidement un homelab sur Debian (Raspberry Pi, mini-PC
 
 ## Captures d'ecran
 
-### Saisie de l'hote
+![Dashboard](screenshot/dashboard.png)
 
-![Saisie de l'hote](screenshot/host_input.png)
+<p align="center">
+  <img src="screenshot/host_input.png" alt="Saisie de l'hote" width="32%" />
+  <img src="screenshot/basic_auth_input.png" alt="Configuration basic auth" width="32%" />
+  <img src="screenshot/services_select.png" alt="Selection des services" width="32%" />
+</p>
 
-### Configuration basic auth
-
-![Configuration basic auth](screenshot/basic_auth_input.png)
-
-### Selection des services
-
-![Selection des services](screenshot/services_select.png)
 
 ## Structure du projet
 
@@ -102,18 +99,18 @@ chmod +x scripts/*.sh
 
 ## Backup et restore
 
-- Sauvegarder les donnees `n8n`, `portainer` et `netdata`:
+- Sauvegarder les données `n8n`, `portainer` et `netdata`:
 
 ```bash
 ./scripts/backup.sh
 ```
 
-Ce script cree des archives horodatees dans `backups/`:
+Ce script crée des archives horodatées dans `backups/`:
 - `backups/n8n_YYYYmmdd_HHMMSS.tar.gz`
 - `backups/portainer_YYYYmmdd_HHMMSS.tar.gz`
 - `backups/netdata_YYYYmmdd_HHMMSS.tar.gz`
 
-- Restaurer la derniere sauvegarde disponible de chaque service:
+- Réstaurer la derniere sauvegarde disponible de chaque service:
 
 ```bash
 ./scripts/restore.sh
@@ -125,7 +122,7 @@ Ce script cree des archives horodatees dans `backups/`:
 ./scripts/restore.sh 20260313_154500
 ```
 
-Le script de restore stoppe temporairement les conteneurs concerns (`n8n`, `portainer`, `netdata`) puis les redemarre apres extraction.
+Le script de restore stoppe temporairement les conteneurs concerns (`n8n`, `portainer`, `netdata`) puis les redémarre apres extraction.
 
 ## Variables `.env`
 
@@ -135,7 +132,7 @@ Valeurs gérées par `scripts/init.sh`:
 - `BASIC_AUTH_USERNAME`
 - `BASIC_AUTH_PASSWORD_HASH`
 
-Valeurs applicatives (initialisees avec des defaults):
+Valeurs applicatives (initialisées avec des defaults):
 
 - `GENERIC_TIMEZONE`
 - `POSTGRES_USER`
