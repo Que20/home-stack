@@ -71,7 +71,7 @@ ask_password() {
 
 bcrypt_hash_password() {
     local plain_password="$1"
-    docker run --rm caddy:2 caddy hash-password --plaintext "$plain_password"
+    printf '%s\n' "$plain_password" | docker run --rm -i caddy:2 caddy hash-password
 }
 
 escape_dollars_for_env() {
@@ -129,7 +129,7 @@ fi
 {
     printf 'GENERIC_TIMEZONE=Europe/Paris\n'
     printf 'POSTGRES_USER=admin\n'
-    printf 'POSTGRES_PASSWORD=change-me\n'
+    printf 'POSTGRES_PASSWORD=%s\n' "$(openssl rand -base64 24)"
     printf 'POSTGRES_DB=db\n'
     printf 'HOST_IP=%s\n' "$host_value"
     printf 'BASIC_AUTH_USERNAME=%s\n' "$auth_username"
