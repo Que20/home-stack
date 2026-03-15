@@ -1,3 +1,5 @@
 .env
 .DS_Store
-compose/reverse-proxy/Caddyfile
+config/**
+!config/**/
+!config/**/.gitkeep
