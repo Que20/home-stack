@@ -81,6 +81,7 @@ choose_services_with_whiptail() {
     current="$(whiptail --title "Home Stack" --checklist "Sélectionne les services à installer" 20 90 10 \
     "n8n" "n8n" ON \
     "gokapi" "gokapi" ON \
+    "metube" "metube" ON \
     "netdata" "netdat (netdata)" ON \
     "postgres" "postgres" ON \
     "portainer" "portainer" ON \
@@ -94,9 +95,10 @@ choose_services_fallback() {
     echo "whiptail non disponible, passage en mode texte."
     echo "1) n8n"
     echo "2) gokapi"
-    echo "3) netdata"
-    echo "4) postgres"
-    read -r -p "Entre les numéros séparés par des virgules (ex: 1,3,4): " choice
+    echo "3) metube"
+    echo "4) netdata"
+    echo "5) postgres"
+    read -r -p "Entre les numéros séparés par des virgules (ex: 1,3,5): " choice
 
     SELECTED=()
     IFS=',' read -r -a picked <<< "$choice"
@@ -106,8 +108,9 @@ choose_services_fallback() {
         case "${item// /}" in
             1) SELECTED+=("n8n") ;;
             2) SELECTED+=("gokapi") ;;
-            3) SELECTED+=("netdata") ;;
-            4) SELECTED+=("postgres") ;;
+            3) SELECTED+=("metube") ;;
+            4) SELECTED+=("netdata") ;;
+            5) SELECTED+=("postgres") ;;
         esac
     done
 }
@@ -136,6 +139,12 @@ generate_caddyfile() {
         if contains "gokapi" "${SELECTED[@]}"; then
             printf '\thandle_path /gokapi/* {\n'
             printf '\t\treverse_proxy gokapi:53842\n'
+            printf '\t}\n\n'
+        fi
+
+        if contains "metube" "${SELECTED[@]}"; then
+            printf '\thandle_path /metube/* {\n'
+            printf '\t\treverse_proxy metube:8081\n'
             printf '\t}\n\n'
         fi
 
@@ -192,7 +201,7 @@ echo "Caddyfile généré: $CADDYFILE_PATH"
 
 docker network inspect web >/dev/null 2>&1 || docker network create web
 
-for service in postgres n8n gokapi netdata portainer; do
+for service in postgres n8n gokapi metube netdata portainer; do
     if contains "$service" "${SELECTED[@]}"; then
         echo "Déploiement ${service}"
         docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/compose/${service}/compose.yml" up -d
