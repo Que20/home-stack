@@ -5,6 +5,7 @@ services:
     restart: unless-stopped
     environment:
       - TZ=${GENERIC_TIMEZONE}
+      - URL_PREFIX=/metube
     volumes:
       - metube_downloads:/downloads
     networks:
