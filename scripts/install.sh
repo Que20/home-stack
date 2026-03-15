@@ -3,7 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ENV_FILE="$ROOT_DIR/.env"
-CADDYFILE_PATH="$ROOT_DIR/compose/reverse-proxy/Caddyfile"
+CADDY_CONFIG_DIR="$ROOT_DIR/config/caddy"
+CADDYFILE_PATH="$CADDY_CONFIG_DIR/Caddyfile"
 
 get_env_value() {
     local key="$1"
@@ -119,11 +120,17 @@ generate_caddyfile() {
     local host="$1"
     local auth_username="$2"
     local auth_hash="$3"
+    local timestamp
+
+    mkdir -p "$CADDY_CONFIG_DIR"
+
+    if [ -f "$CADDYFILE_PATH" ]; then
+        timestamp="$(date +%Y%m%d_%H%M%S)"
+        mv "$CADDYFILE_PATH" "${CADDYFILE_PATH}.${timestamp}"
+    fi
 
     {
         printf '%s {\n' "$host"
-        printf '\ttls internal\n\n'
-
         if [ -n "$auth_username" ] && [ -n "$auth_hash" ]; then
             printf '\tbasic_auth {\n'
             printf '\t\t%s %s\n' "$auth_username" "$auth_hash"
@@ -208,7 +215,7 @@ for service in postgres n8n gokapi metube netdata portainer; do
     fi
 done
 
-echo "Déploiement reverse proxy"
-docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/compose/reverse-proxy/compose.yml" up -d
+echo "Déploiement caddy"
+docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/compose/caddy/compose.yml" up -d
 
 echo "Installation terminée"

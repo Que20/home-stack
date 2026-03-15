@@ -27,6 +27,9 @@ Stack Docker pour monter rapidement un homelab sur Debian (Raspberry Pi, mini-PC
 ```text
 home-stack/
 |-- .env.example
+|-- config/
+|   `-- caddy/
+|       `-- Caddyfile
 |-- compose/
 |   |-- gokapi/
 |   |   `-- compose.yml
@@ -39,8 +42,7 @@ home-stack/
 |   |-- postgres/
 |   |   |-- compose.yml
 |   |   `-- init.sql
-|   `-- reverse-proxy/
-|       |-- Caddyfile
+|   `-- caddy/
 |       `-- compose.yml
 |-- html/
 |   `-- index.html
@@ -152,5 +154,5 @@ Valeurs applicatives (initialisées avec des defaults):
 
 - Les informations relatives à la config db sont à changer manuellement dans le .env.
 - Le reseau Docker partage est `web`.
-- Le fichier `compose/reverse-proxy/Caddyfile` est genéré automatiquement par `scripts/install.sh`.
+- Le fichier `config/caddy/Caddyfile` est généré automatiquement par `scripts/install.sh`.
 - La page d'accueil est servie depuis `html/index.html`.
