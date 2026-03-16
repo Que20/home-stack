@@ -84,6 +84,7 @@ choose_services_with_whiptail() {
     "gokapi" "gokapi" ON \
     "metube" "metube" ON \
     "netdata" "netdat (netdata)" ON \
+    "glances" "glances" ON \
     "postgres" "postgres" ON \
     "portainer" "portainer" ON \
     3>&1 1>&2 2>&3)"
@@ -98,7 +99,9 @@ choose_services_fallback() {
     echo "2) gokapi"
     echo "3) metube"
     echo "4) netdata"
-    echo "5) postgres"
+    echo "5) glances"
+    echo "6) postgres"
+    echo "7) portainer"
     read -r -p "Entre les numéros séparés par des virgules (ex: 1,3,5): " choice
 
     SELECTED=()
@@ -111,7 +114,9 @@ choose_services_fallback() {
             2) SELECTED+=("gokapi") ;;
             3) SELECTED+=("metube") ;;
             4) SELECTED+=("netdata") ;;
-            5) SELECTED+=("postgres") ;;
+            5) SELECTED+=("glances") ;;
+            6) SELECTED+=("postgres") ;;
+            7) SELECTED+=("portainer") ;;
         esac
     done
 }
@@ -167,6 +172,12 @@ generate_caddyfile() {
             printf '\t}\n\n'
         fi
 
+        if contains "glances" "${SELECTED[@]}"; then
+            printf '\thandle_path /glances/* {\n'
+            printf '\t\treverse_proxy glances:61208\n'
+            printf '\t}\n\n'
+        fi
+
         printf '\thandle {\n'
         printf '\t\troot * /srv\n'
         printf '\t\tfile_server\n'
@@ -208,7 +219,7 @@ echo "Caddyfile généré: $CADDYFILE_PATH"
 
 docker network inspect web >/dev/null 2>&1 || docker network create web
 
-for service in postgres n8n gokapi metube netdata portainer; do
+for service in postgres n8n gokapi metube netdata glances portainer; do
     if contains "$service" "${SELECTED[@]}"; then
         echo "Déploiement ${service}"
         docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/compose/${service}/compose.yml" up -d
