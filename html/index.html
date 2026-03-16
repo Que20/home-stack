@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Raspberry Pi Dashboard</title>
+    <title>Home Stack Dashboard</title>
     <style>
         :root {
             color-scheme: dark;
@@ -257,6 +257,14 @@
                 <h2>Netdata</h2>
                 <p>Monitoring temps réel du Raspberry Pi : CPU, RAM, disque, réseau et processus.</p>
                 <span class="link">Ouvrir Netdata →</span>
+            </a>
+
+            <a class="card" href="/glances/" data-health-url="/glances/">
+                <span class="service-indicator" aria-label="Statut du service"></span>
+                <div class="icon">GL</div>
+                <h2>Glances</h2>
+                <p>Vue synthétique des performances système et des conteneurs Docker en temps réel.</p>
+                <span class="link">Ouvrir Glances →</span>
             </a>
 
             <a class="card" href="/portainer/" data-health-url="/portainer/">
