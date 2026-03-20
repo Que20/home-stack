@@ -1,0 +1,12 @@
+services:
+  bentopdf:
+    image: ghcr.io/alam00000/bentopdf:latest
+    container_name: bentopdf
+    restart: unless-stopped
+    networks:
+      - default
+      - web
+
+networks:
+  web:
+    external: true

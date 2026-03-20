@@ -7,9 +7,11 @@ Stack Docker pour monter rapidement un homelab sur Debian (Raspberry Pi, mini-PC
 - `n8n`
 - `gokapi`
 - `metube`
+- `bentopdf`
 - `netdata`
 - `glances`
 - `postgres`
+- `portainer`
 - `caddy` (reverse proxy + page d'accueil)
 
 ## Captures d'ecran
@@ -35,6 +37,8 @@ home-stack/
 |   |-- gokapi/
 |   |   `-- compose.yml
 |   |-- metube/
+|   |   `-- compose.yml
+|   |-- bentopdf/
 |   |   `-- compose.yml
 |   |-- n8n/
 |   |   `-- compose.yml

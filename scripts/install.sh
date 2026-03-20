@@ -83,6 +83,7 @@ choose_services_with_whiptail() {
     "n8n" "n8n" ON \
     "gokapi" "gokapi" ON \
     "metube" "metube" ON \
+    "bentopdf" "bentopdf" ON \
     "netdata" "netdat (netdata)" ON \
     "glances" "glances" ON \
     "postgres" "postgres" ON \
@@ -98,10 +99,11 @@ choose_services_fallback() {
     echo "1) n8n"
     echo "2) gokapi"
     echo "3) metube"
-    echo "4) netdata"
-    echo "5) glances"
-    echo "6) postgres"
-    echo "7) portainer"
+    echo "4) bentopdf"
+    echo "5) netdata"
+    echo "6) glances"
+    echo "7) postgres"
+    echo "8) portainer"
     read -r -p "Entre les numéros séparés par des virgules (ex: 1,3,5): " choice
 
     SELECTED=()
@@ -113,10 +115,11 @@ choose_services_fallback() {
             1) SELECTED+=("n8n") ;;
             2) SELECTED+=("gokapi") ;;
             3) SELECTED+=("metube") ;;
-            4) SELECTED+=("netdata") ;;
-            5) SELECTED+=("glances") ;;
-            6) SELECTED+=("postgres") ;;
-            7) SELECTED+=("portainer") ;;
+            4) SELECTED+=("bentopdf") ;;
+            5) SELECTED+=("netdata") ;;
+            6) SELECTED+=("glances") ;;
+            7) SELECTED+=("postgres") ;;
+            8) SELECTED+=("portainer") ;;
         esac
     done
 }
@@ -157,6 +160,12 @@ generate_caddyfile() {
         if contains "metube" "${SELECTED[@]}"; then
             printf '\thandle_path /metube/* {\n'
             printf '\t\treverse_proxy metube:8081\n'
+            printf '\t}\n\n'
+        fi
+
+        if contains "bentopdf" "${SELECTED[@]}"; then
+            printf '\thandle_path /bentopdf/* {\n'
+            printf '\t\treverse_proxy bentopdf:8080\n'
             printf '\t}\n\n'
         fi
 
@@ -219,7 +228,7 @@ echo "Caddyfile généré: $CADDYFILE_PATH"
 
 docker network inspect web >/dev/null 2>&1 || docker network create web
 
-for service in postgres n8n gokapi metube netdata glances portainer; do
+for service in postgres n8n gokapi metube bentopdf netdata glances portainer; do
     if contains "$service" "${SELECTED[@]}"; then
         echo "Déploiement ${service}"
         docker compose --env-file "$ENV_FILE" -f "$ROOT_DIR/compose/${service}/compose.yml" up -d
