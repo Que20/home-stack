@@ -34,6 +34,8 @@ services:
   invoice-builder-frontend:
     image: ghcr.io/piratuks/invoice-builder:latest
     container_name: invoice-builder-frontend
+    ports:
+      - '3001:3001'
     restart: unless-stopped
     environment:
       - SERVICE=frontend
