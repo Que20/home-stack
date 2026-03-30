@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    ports:
+      - "3000:3000"
     environment:
       - SERVICE=backend
       - NODE_ENV=docker
