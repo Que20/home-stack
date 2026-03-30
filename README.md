@@ -12,6 +12,7 @@ Stack Docker pour monter rapidement un homelab sur Debian (Raspberry Pi, mini-PC
 - `glances`
 - `postgres`
 - `portainer`
+- `invoice-builder`
 - `caddy` (reverse proxy + page d'accueil)
 
 ## Captures d'ecran
@@ -43,6 +44,8 @@ home-stack/
 |   |-- n8n/
 |   |   `-- compose.yml
 |   |-- netdata/
+|   |   `-- compose.yml
+|   |-- invoice-builder/
 |   |   `-- compose.yml
 |   |-- glances/
 |   |   `-- compose.yml
@@ -163,3 +166,4 @@ Valeurs applicatives (initialisées avec des defaults):
 - Le reseau Docker partage est `web`.
 - Le fichier `config/caddy/Caddyfile` est généré automatiquement par `scripts/install.sh`.
 - La page d'accueil est servie depuis `html/index.html`.
+- `invoice-builder` est exposé via `http://<HOST_IP>/invoice-builder/`.
